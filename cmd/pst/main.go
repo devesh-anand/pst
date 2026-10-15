@@ -22,11 +22,31 @@ import (
 )
 
 func main() {
-	log := slog.New(slog.NewTextHandler(os.Stderr, nil))
+	log := newLogger(os.Getenv("PST_LOG_FORMAT"), os.Stdout)
 	if err := run(log); err != nil {
 		log.Error("fatal", "err", err)
 		os.Exit(1)
 	}
+}
+
+// newLogger writes to stdout, since hosts like Railway flag every stderr line
+// as an error. format is "json", "text", or "" to pick text for a terminal and
+// JSON otherwise, which log platforms parse into levels and searchable fields.
+func newLogger(format string, out *os.File) *slog.Logger {
+	if format == "" {
+		format = "json"
+		if fi, err := out.Stat(); err == nil && fi.Mode()&os.ModeCharDevice != 0 {
+			format = "text"
+		}
+	}
+	return slog.New(newHandler(format, out))
+}
+
+func newHandler(format string, out io.Writer) slog.Handler {
+	if format == "text" {
+		return slog.NewTextHandler(out, nil)
+	}
+	return slog.NewJSONHandler(out, nil)
 }
 
 func run(log *slog.Logger) error {

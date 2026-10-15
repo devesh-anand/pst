@@ -123,6 +123,7 @@ which holds the decryption key, must not travel in the clear.
 | `PST_REQUIRE_WRITE_PASSWORD` | `false` | Require a password to create pastes |
 | `PST_WRITE_PASSWORD` | | The write password (≥ 12 chars when required) |
 | `PST_CLIENT_IP_HEADER` | | Trusted proxy header holding the client IP |
+| `PST_LOG_FORMAT` | auto | `json` or `text`; text in a terminal, JSON otherwise. Logs go to stdout |
 
 ## API
 
