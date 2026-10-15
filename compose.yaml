@@ -1,0 +1,17 @@
+services:
+  pst:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8080:8080" # expose only to the reverse proxy on this host
+    volumes:
+      - pst-data:/data
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  pst-data:

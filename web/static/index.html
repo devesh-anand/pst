@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>pst</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/app.css">
+  <script type="module" src="/static/js/create.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a href="/" class="brand">pst</a>
+    <span class="tagline">end-to-end encrypted pastes</span>
+  </header>
+
+  <main>
+    <form id="create-form" class="stack" novalidate>
+      <label for="text" class="sr-only">Paste text</label>
+      <textarea id="text" spellcheck="false" autocomplete="off" autocapitalize="off"
+        placeholder="Paste text here…" autofocus></textarea>
+
+      <div class="options">
+        <label class="field">
+          <span>Expires</span>
+          <select id="expiry"></select>
+        </label>
+        <label class="field">
+          <span>Paste password <small>optional</small></span>
+          <input type="password" id="paste-password" autocomplete="new-password">
+        </label>
+        <label class="field" id="write-password-row" hidden>
+          <span>Write password</span>
+          <input type="password" id="write-password" autocomplete="current-password">
+        </label>
+        <label class="check">
+          <input type="checkbox" id="burn">
+          <span>Burn after reading</span>
+        </label>
+      </div>
+
+      <p id="error" class="error" role="alert" hidden></p>
+
+      <div class="actions">
+        <span id="size" class="muted"></span>
+        <span class="muted hint">Ctrl + Enter</span>
+        <button type="submit" id="submit">Create paste</button>
+      </div>
+    </form>
+
+    <section id="result" class="stack card" hidden>
+      <h1>Paste created</h1>
+      <p class="muted">Anyone with this link can read the paste. The key after <code>#</code> never reaches the server.</p>
+      <div class="copy-row">
+        <label for="share-url" class="sr-only">Share link</label>
+        <input id="share-url" readonly>
+        <button id="copy-url" type="button">Copy</button>
+      </div>
+      <p id="result-meta" class="muted"></p>
+      <details>
+        <summary>Delete token</summary>
+        <p class="muted">This browser remembers it, but keep a copy if you want to delete the paste from elsewhere.</p>
+        <div class="copy-row">
+          <label for="delete-token" class="sr-only">Delete token</label>
+          <input id="delete-token" readonly>
+          <button id="copy-token" type="button" class="secondary">Copy</button>
+        </div>
+      </details>
+      <div class="actions">
+        <a href="/" class="button secondary">New paste</a>
+        <a id="open-link" class="button">Open paste</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="muted">Encrypted in your browser with AES-256-GCM. The server stores ciphertext only.</footer>
+</body>
+</html>

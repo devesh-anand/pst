@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>pst</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/app.css">
+  <script type="module" src="/static/js/view.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a href="/" class="brand">pst</a>
+    <span class="tagline">end-to-end encrypted pastes</span>
+    <a href="/" class="button secondary new">New paste</a>
+  </header>
+
+  <main>
+    <p id="status" class="status" role="status">Loading…</p>
+
+    <section id="burn-confirm" class="stack card" hidden>
+      <h1>Burn after reading</h1>
+      <p class="muted">This paste is deleted from the server as soon as you open it.</p>
+      <div class="actions"><button id="reveal" type="button">Reveal paste</button></div>
+    </section>
+
+    <form id="password-form" class="stack card" hidden>
+      <h1>Password required</h1>
+      <label class="field">
+        <span>Paste password</span>
+        <input type="password" id="password" autocomplete="off" required>
+      </label>
+      <p id="password-error" class="error" role="alert" hidden></p>
+      <div class="actions"><button type="submit">Decrypt</button></div>
+    </form>
+
+    <section id="paste" class="stack" hidden>
+      <div class="toolbar">
+        <span id="meta" class="muted"></span>
+        <div class="buttons">
+          <button id="copy" type="button" class="secondary">Copy</button>
+          <button id="download" type="button" class="secondary">Download</button>
+          <button id="delete" type="button" class="danger" hidden>Delete</button>
+        </div>
+      </div>
+      <pre id="content" tabindex="0"></pre>
+    </section>
+  </main>
+</body>
+</html>
