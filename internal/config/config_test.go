@@ -10,7 +10,7 @@ func clearEnv(t *testing.T) {
 	for _, k := range []string{
 		"PST_ADDR", "PST_DB_PATH", "PST_META_STORE", "PST_BLOB_STORE", "PST_ID_LENGTH",
 		"PST_MAX_PASTE_BYTES", "PST_ALLOW_NEVER_EXPIRE", "PST_REQUIRE_WRITE_PASSWORD",
-		"PST_WRITE_PASSWORD", "PST_CLIENT_IP_HEADER",
+		"PST_WRITE_PASSWORD", "PST_CLIENT_IP_HEADER", "PORT",
 	} {
 		t.Setenv(k, "")
 	}
@@ -80,5 +80,29 @@ func TestPasswordIgnoredWhenFlagOff(t *testing.T) {
 	t.Setenv("PST_WRITE_PASSWORD", "short")
 	if _, err := Load(); err != nil {
 		t.Fatalf("Load with flag off should not validate the password: %v", err)
+	}
+}
+
+func TestListenAddress(t *testing.T) {
+	cases := []struct {
+		name, pstAddr, port, want string
+	}{
+		{"default", "", "", ":8080"},
+		{"platform PORT", "", "3456", ":3456"},
+		{"PST_ADDR wins over PORT", "127.0.0.1:9000", "3456", "127.0.0.1:9000"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			clearEnv(t)
+			t.Setenv("PST_ADDR", tc.pstAddr)
+			t.Setenv("PORT", tc.port)
+			c, err := Load()
+			if err != nil {
+				t.Fatalf("Load: %v", err)
+			}
+			if c.Addr != tc.want {
+				t.Fatalf("Addr = %q, want %q", c.Addr, tc.want)
+			}
+		})
 	}
 }

@@ -80,7 +80,9 @@ func Open(ctx context.Context, path string) (*DB, error) {
 	}
 	if err := db.PingContext(ctx); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("open sqlite database: %w", err)
+		// The usual cause in containers is a volume mounted root-owned while
+		// pst runs as a non-root user.
+		return nil, fmt.Errorf("open sqlite database %s (is its directory writable by this user?): %w", path, err)
 	}
 	d := &DB{db: db}
 	if err := d.migrate(ctx); err != nil {

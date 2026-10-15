@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	Addr          string // PST_ADDR
+	Addr          string // PST_ADDR, else ":$PORT" (set by most PaaS hosts), else ":8080"
 	DBPath        string // PST_DB_PATH
 	MetaStore     string // PST_META_STORE: backend for paste metadata ("sqlite")
 	BlobStore     string // PST_BLOB_STORE: backend for paste content ("sqlite")
@@ -32,7 +32,7 @@ type Config struct {
 // Load reads configuration from the environment and validates it.
 func Load() (Config, error) {
 	c := Config{
-		Addr:           env("PST_ADDR", ":8080"),
+		Addr:           env("PST_ADDR", ":"+env("PORT", "8080")),
 		DBPath:         env("PST_DB_PATH", "data/pst.db"),
 		MetaStore:      env("PST_META_STORE", "sqlite"),
 		BlobStore:      env("PST_BLOB_STORE", "sqlite"),

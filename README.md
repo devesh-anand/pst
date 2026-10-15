@@ -40,12 +40,55 @@ To require a password for writes:
 PST_REQUIRE_WRITE_PASSWORD=true PST_WRITE_PASSWORD='a-long-random-string' go run ./cmd/pst
 ```
 
-### Docker
+## Deploy
+
+The image is portable. Every platform needs only:
+
+1. Build from the [Dockerfile](Dockerfile).
+2. Persistent storage mounted at **`/data`**, which holds the SQLite database.
+3. **One instance.** SQLite needs a single writer, so don't scale out.
+4. Optionally, a healthcheck on `GET /healthz`.
+
+pst listens on `$PORT` when the platform sets it, otherwise on `:8080`. The
+container runs as a non-root user (UID 65532). If a platform mounts volumes
+owned by root, pst can't write the database and exits with "is its directory
+writable by this user?".
+
+### Railway
+
+[railway.json](railway.json) sets the build and the healthcheck. In the
+dashboard:
+
+1. Deploy from the GitHub repo.
+2. Add a volume mounted at `/data`.
+3. Set variables: `PST_REQUIRE_WRITE_PASSWORD`, `PST_WRITE_PASSWORD`,
+   `PST_CLIENT_IP_HEADER=X-Real-IP`, and `RAILWAY_RUN_UID=0`. Railway volumes
+   are root-owned, and `RAILWAY_RUN_UID=0` lets the container write to them.
+4. Under Networking, add your custom domain.
+
+### Docker Compose (any VPS)
 
 ```bash
 cp .env.example .env   # set PST_WRITE_PASSWORD
 docker compose up -d --build
 ```
+
+The named volume picks up the image's `/data` ownership, so this needs no
+UID changes.
+
+### Plain Docker
+
+```bash
+docker build -t pst .
+docker run -d --name pst -p 127.0.0.1:8080:8080 -v pst-data:/data --env-file .env pst
+```
+
+### Moving between hosts
+
+Links contain the decryption key and only depend on your domain, not on the
+host. To migrate, stop pst, copy `pst.db` from `/data` (stopping first makes
+sure the WAL is checkpointed), start it on the new host, and point DNS there.
+Every existing link keeps working.
 
 ### Behind a reverse proxy (e.g. `pst.deve.sh`)
 
@@ -70,7 +113,7 @@ which holds the decryption key, must not travel in the clear.
 
 | Variable | Default | Description |
 |---|---|---|
-| `PST_ADDR` | `:8080` | Listen address |
+| `PST_ADDR` | `:$PORT` or `:8080` | Listen address; falls back to the `PORT` variable most hosts set |
 | `PST_DB_PATH` | `data/pst.db` | SQLite file |
 | `PST_META_STORE` | `sqlite` | Metadata backend |
 | `PST_BLOB_STORE` | `sqlite` | Content backend |

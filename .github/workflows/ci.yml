@@ -36,4 +36,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: No VOLUME instruction (Railway rejects it)
+        run: "! grep -nE '^[[:space:]]*VOLUME' Dockerfile"
       - run: docker build -t pst:ci .
+      - name: Smoke test (non-root /data write, $PORT, write password)
+        run: |
+          docker run -d --name pst -p 9999:9999 -e PORT=9999 \
+            -e PST_REQUIRE_WRITE_PASSWORD=true -e PST_WRITE_PASSWORD=ci-password-123 pst:ci
+          for i in $(seq 1 20); do curl -fsS localhost:9999/healthz && break; sleep 1; done
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:9999/api/pastes \
+            -H 'Content-Type: application/json' -d '{"content":"a.b","expiresIn":3600}')
+          test "$code" = 401
+          curl -fsS -X POST localhost:9999/api/pastes -H 'Authorization: Bearer ci-password-123' \
+            -H 'Content-Type: application/json' -d '{"content":"a.b","expiresIn":3600}'
+      - name: Container logs
+        if: always()
+        run: docker logs pst || true
